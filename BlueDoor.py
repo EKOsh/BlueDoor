@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 from easygui import *
+from os import system
+from datetime import datetime
 import configparser
 config = configparser.ConfigParser(allow_no_value=True)
 config.read('weed.ini')
@@ -13,7 +15,9 @@ db = SqliteDatabase('BDdb.db')
 class SALES(Model):
     name = CharField()
     amount = CharField()
+    price = CharField()
     cost = CharField()
+    time = CharField()
 
     class Meta:
         database = db
@@ -29,7 +33,7 @@ def buy(item):
 	am = int(fieldValues[0])
 	pr = int(fieldValues[1])
 	summ = am * pr
-	sale = SALES.create(name = item, amount = am, cost = summ)
+	sale = SALES.create(name = item, amount = am, price = pr, cost = summ, time = str(datetime.now()))
 	sale.save()
 	print('Amount is {}G, price is {}$. This item = {}$'.format(am, pr, summ))
 	return summ
@@ -49,15 +53,22 @@ while 1:
 		msg = 'Select strain and press OK'
 		choices = config[command]
 		item = choicebox(msg, title, choices)
+	
+	if command == 'Extra':
+		msg = 'Select extra and press OK'
+		choices = config[command]
+		item = choicebox(msg, title, choices)
 		
 	if command == 'Exit':
 		break
+
 	cost = buy(item)
 	allsumm = allsumm + cost
 	answer = ynbox('Same customer?', 'Warning', ('Yes', 'No'))
 	if answer == 0:
 		msgbox('Total is: {}$'.format(allsumm))
 		allsumm = 0
+		system('cls')
 
 	
 	print(item)
